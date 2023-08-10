@@ -305,8 +305,169 @@ Ceres库，g2o库
 
   + P3P
 
+    利用三对点求相机外参
+
+    缺点：
+
+    + 对三个点以上的情况难以处理
+    + 误匹配时算法失效
+
   + EPnP/UPnP
 
 + 优化解法
 
   + Bundle Adjustment
+  
+    + 最小化重投影误差（Minimizing a reprojection error)
+    + 投影关系：
+    + 定义重投影误差并取最小化
+  
+    ![image-20230807143720583](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807143720583.png)
+  
+  ![image-20230807143858339](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807143858339.png)
+  
+  
+
+![image-20230807144637240](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807144637240.png)
+
+### 7.8 PNP实践
+
+### 7.9 3D-3D ICP
+
+两组配对好的3D点，求其旋转和平移，可用迭代最近点求解（ICP, Iterative Closest Point）
+
+![image-20230807150305336](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807150305336.png)
+
+推导：
+
+![image-20230807150357198](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807150357198.png)
+
+![image-20230807150709739](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807150709739.png)
+
+![image-20230807150852054](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807150852054.png)
+
+![image-20230807151018440](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807151018440.png)
+
+### 7.10 ICP实践
+
+
+
+---
+
+## Ch 8 视觉里程计（2）
+
+### 8.1 直接法和光流
+
+![image-20230807152346222](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807152346222.png)
+
+不提取特征：
+
++ 通过其他方式寻找配对点：光流
++ 无配对点：直接法
+
+### 8.2 光流
+
+稀疏光流： 以Lucas-Kanade LK光流为代表
+
+稠密光流：以Horn-Schunck HS光流为代表
+
+本质上是估计像素在不同时刻图像中的运动
+
+![image-20230807154826857](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807154826857.png)
+
+灰度不变假设：![image-20230807155035274](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807155035274.png)
+
+实际由于高光/阴影/材质/曝光等不同可能不成立
+
+![image-20230807155554551](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807155554551.png)
+
+![image-20230807155955407](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807155955407.png)
+
+![image-20230807160501923](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230807160501923.png)
+
+### 8.3 实践：LK光流
+
+### 8.4 直接法
+
+光流缺点：
+
++ 仅估计了像素间的平移
++ 没有用到相机本身的几何结构
++ 没有考虑到相机的旋转和图像的缩放
+
+直接法推导
+
++ 两个帧，运动未知，有初始估计R，t
++ 第一帧看到了点P，投影为p1
++ 按照初始估计，P在第二帧上投影为p2
+
+![image-20230809135643082](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230809135643082.png)
+
+![image-20230809141248266](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230809141248266.png)
+
+![image-20230809143917232](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230809143917232.png)
+
+
+
++ 稀疏直接法：只处理稀疏角点或关键点
++ 稠密直接法：使用所有像素
++ 半稠密直接法：使用部分梯度明显像素
+
+### 8.5 直接法实践
+
+![image-20230809145827074](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230809145827074.png)
+
+![image-20230809150045292](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230809150045292.png)
+
+## Ch 10 后端
+
++ 理解以EFK为代表的滤波器后端原理
++ 理解非线性化的后端工作原理
++ 使用g2o和Ceres实际操作后端优化
+
+### 10.1 EKF滤波器形式后端
+
+后端（Backend)
+
++ 从带噪声的数据估计内在状态-状态估计问题
++ Estimated the inner state from noisy data
+
+渐进式(Incremental)
+
++ 保持当前状态的估计，在加入新信息时，更新已有的估计（滤波）
+
+批量式（Batch）-主流
+
++ 给定一定规模的数据，计算该数据下的最有估计（优化）
+
+不确定性随时间累积->观测周围，将不确定性保持在一定范围
+
+![image-20230810150948206](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810150948206.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# VSLAM

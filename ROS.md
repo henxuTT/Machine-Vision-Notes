@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
 ### 5.1 cpp实现
 
-```s
+```c++
 #include <ros/ros.h>
 #include "turtlesim/Pose.h"
 

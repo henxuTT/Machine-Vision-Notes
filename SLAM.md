@@ -444,6 +444,20 @@ Ceres库，g2o库
 
 ![image-20230810150948206](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810150948206.png)
 
+![image-20230810151348063](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810151348063.png)
+
+
+
+### 10.2 BA与图优化
+
+**Bundle Adjustment** 
+
++ 属于批量式优化方法
+
++ 给定多个相机位姿和观测数据，计算最优的状态估计
++ 定义每个运动/观测方程的误差，从初始估计开始寻找梯度下降
+
+![image-20230810153211011](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810153211011.png)
 
 
 
@@ -457,16 +471,152 @@ Ceres库，g2o库
 
 
 
+# ROS
+
+## LIDAR 激光雷达
+
+**LIDAR： Light Detection and Ranging**
+
+**分类：**
+
++ 单线雷达/多线雷达
++ 三角测距雷达/TOF雷达
++ 机械旋转雷达/固态雷达
+
+**数据格式**
+
++ 激光雷达的数据通常表现为三维点云。每个点包括X、Y和Z坐标以及可能的其他信息，如强度（光的反射强度）。
+
++ 在ROS中，激光雷达的数据通常使用`sensor_msgs/PointCloud2`消息类型表示。此消息类型包括点云的组织结构（有序或无序）、尺寸、点的数据字段（如位置和强度）以及点数据本身。
+
+**处理方式**
+
+1. **预处理**：包括滤波、去噪、降采样等，以减少计算复杂性和去除噪声。
+2. **分割与分类**：根据几何、反射特性等将点云分割成有意义的部分，例如，识别出建筑、植被、地面等。
+3. **特征提取**：从点云中提取有用的特征以用于进一步的分析或识别。
+4. **配准和建模**：使用点云数据构建三维模型或将多个点云源对齐。
+5. **导航和定位**：在机器人领域，激光雷达经常用于导航和定位，例如使用SLAM（同时定位和映射）算法。
+
+**数据格式**
+
+![image-20230810175325076](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810175325076.png)
+
+**消息包**
+
+![image-20230810181340742](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810181340742.png)
+
+实现步骤
+
++ 构建lidar_pkg软件包
++ 构建新节点 lidar_node
++ 在节点中，向ROS大管家NodeHandler申请订阅话题/scan，并设置回调函数为LidarCallback（）。
++ 构建回调函数LidarCallback（），用来接收和处理雷达数据
++ 调用ROS_INFO()显示雷达监测到的距离
 
 
 
 
 
+## RViz
+
+The Robot Visualization Tool
+
+RViz是一个3D可视化工具，用于显示与机器人操作系统（ROS）一起使用的传感器数据、机器人状态、计划、导航等。
+
+**主要功能**
+
+- **机器人模型可视化**：可以显示URDF定义的机器人模型，并实时显示其配置和状态。
+- **传感器数据显示**：支持许多常见的传感器数据类型，包括2D和3D激光扫描、点云、图像、深度图像等。
+- **路径和导航可视化**：用于显示机器人的目标、路径和导航信息，支持导航栈的各个组件。
+- **TF变换树**：可以可视化ROS中的TF变换树，用于理解和调试坐标变换。
+- **交互式标记**：支持3D交互式标记，使开发人员能够与运行的ROS应用程序进行交互。
 
 
 
 
 
+## IMU 惯性测量单元
+
+**Inertial Measurement Unit**（惯性测量单元）
+
+用于测量和报告物体的速度、方向和重力相关的加速度，通过这些信息可以估算物体的姿态。
+
+IMU 的核心组成部分包括：
+
+1. **加速度计**：测量三轴上的线性加速度。
+2. **陀螺仪**：测量三轴上的角速度。
+3. **（有时的）磁力计**：测量三轴上的磁场强度，可以用于获取方向信息，如指南针。
+
+**误差累积**：由于IMU主要是基于积分的方法来估计速度和位置，所以误差会随着时间的推移累积。
+
+**数据格式：**
+
+![image-20230810232305774](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810232305774.png)
+
+![image-20230810232553905](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230810232553905.png)
+
+**常用消息格式：2最常用**
+
+![image-20230811003631738](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230811003631738.png)
+
+**实现步骤：**
+
+1. 构建软件包：imu_pkg
+2. 构建新节点：imu_node
+3. 申请订阅话题/imu/data，设置回调函数IMUCallback（）。
+4. 构建回调函数IMUCallback（）
+5. 使用TF工具将四元数转换为欧拉角
+6. 调用ROS_INFO（）显示转换后的欧拉角数值
+
+**航向锁定实现步骤：**
+
++ 发布速度控制话题/cmd_vel
++ 设定一个**目标朝向角**，当姿态信息与目标朝向角不一致时，控制机器人转向目标朝向角
+
+
+
+## ROS消息包
+
+![image-20230812211732886](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230812211732886.png)
+
+![image-20230812212549889](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230812212549889.png)
+
+![image-20230812213708425](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230812213708425.png)
+
+
+
+![image-20230812223745011](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230812223745011.png)
+
+
+
+## 地图数据格式
+
+占栅格地图
+
++ 栅格边长-》地图分辨率   ROS默认0.05m
++ 三种状态 0 100 -1 （无障碍物 有障碍物 未知）
++ 行列拼接-》数组((0,0)开始，行优先)    nav_msgs::OccupancyGrid
+
+地图node实现步骤
+
++ 构建软件包map_pkg，依赖项里增加nav_msgs
++ 创建节点map_pub_node
++ 发布话题/map，消息类型nav_msgs::OccupancyGrid
++ 构建一个nav_msgs::OccupancyGrid地图消息包，赋值，发送到话题/map
++ 编译运行
++ 启动RViz，订阅话题/map，显示地图
+
+
+
+## SLAM
+
+Simultaneous Localization And Mapping
+
+**Hector_Mapping（ROS工具包）:**
+
+![image-20230815014057435](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230815014057435.png)
+
+![image-20230815014137028](C:\Users\18217\AppData\Roaming\Typora\typora-user-images\image-20230815014137028.png)
 
 
 
